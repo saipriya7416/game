@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #fefce8;
+  --color-primary-100: #fef9c3;
+  --color-primary-200: #fef08a;
+  --color-primary-300: #fde047;
+  --color-primary-400: #facc15;
+  --color-primary-500: #eab308;
+  --color-primary-600: #ca8a04;
+  --color-primary-700: #a16207;
+  --color-primary-800: #854d0e;
+  --color-primary-900: #713f12;
+
+  --color-dark-50: #f9fafb;
+  --color-dark-100: #f3f4f6;
+  --color-dark-200: #e5e7eb;
+  --color-dark-300: #d1d5db;
+  --color-dark-400: #9ca3af;
+  --color-dark-500: #6b7280;
+  --color-dark-600: #4b5563;
+  --color-dark-700: #374151;
+  --color-dark-800: #1f2937;
+  --color-dark-900: #111827;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-50 text-dark-800 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-dark-50 text-dark-700 font-medium py-2 px-4 border border-dark-200 rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-dark-500 focus:ring-offset-2;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-dark-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white placeholder-dark-400;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-dark-100 overflow-hidden;
+  }
+
+  /* Table styling */
+  .table-container {
+    @apply w-full overflow-x-auto;
+  }
+  
+  .data-table {
+    @apply min-w-full divide-y divide-dark-200;
+  }
+  
+  .data-table th {
+    @apply px-6 py-3 bg-dark-50 text-left text-xs font-medium text-dark-500 uppercase tracking-wider;
+  }
+  
+  .data-table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-dark-700;
+  }
+
+  .data-table tbody tr {
+    @apply hover:bg-dark-50 transition-colors duration-150;
+  }
+}
