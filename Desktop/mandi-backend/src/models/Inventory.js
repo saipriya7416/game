@@ -13,6 +13,8 @@ const inventoryLotSchema = new mongoose.Schema({
   remaining: { type: Number }, // To track split-lot allocations
   photos: [{ type: String }], // File links for produce/bills
   isCompleted: { type: Boolean, default: false }, // Track fully sold lots
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const InventoryLot = mongoose.model('InventoryLot', inventoryLotSchema);
@@ -25,6 +27,8 @@ const allocationSchema = new mongoose.Schema({
   rate: { type: Number, required: true }, // Sale rate
   date: { type: Date, default: Date.now },
   invoiced: { type: Boolean, default: false }, // If buyer invoice is generated
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 // Pre-save logic to update remaining quantity in InventoryLot could be in controller

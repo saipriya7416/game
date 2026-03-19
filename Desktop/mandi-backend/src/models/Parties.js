@@ -10,6 +10,8 @@ const supplierSchema = new mongoose.Schema({
   bankDetails: { type: String },
   notes: { type: String },
   balance: { type: Number, default: 0 }, // Outstanding balance tracking
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const Supplier = mongoose.model('Supplier', supplierSchema);
@@ -25,6 +27,8 @@ const buyerSchema = new mongoose.Schema({
   creditLimit: { type: Number, default: 100000 },
   notes: { type: String },
   outstanding: { type: Number, default: 0 }, // Purchase & Payment tracking
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const Buyer = mongoose.model('Buyer', buyerSchema);

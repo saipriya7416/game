@@ -25,6 +25,8 @@ const supplierBillSchema = new mongoose.Schema({
   advancePayment: { type: Number, default: 0 },
   balancePayable: { type: Number, required: true }, // Net - Advance
   status: { type: String, enum: ['Draft', 'Final', 'Paid'], default: 'Draft' }, // Track settlement
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const SupplierBill = mongoose.model('SupplierBill', supplierBillSchema);
@@ -48,6 +50,8 @@ const buyerInvoiceSchema = new mongoose.Schema({
   },
   totalAmount: { type: Number, required: true },
   paymentStatus: { type: String, enum: ['Paid', 'Unpaid', 'Partial'], default: 'Unpaid' },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const BuyerInvoice = mongoose.model('BuyerInvoice', buyerInvoiceSchema);
@@ -61,6 +65,8 @@ const paymentSchema = new mongoose.Schema({
   mode: { type: String, enum: ['Cash', 'UPI', 'Bank'], required: true },
   type: { type: String, enum: ['Partial', 'Advance', 'Full Settlement'], required: true },
   referenceId: { type: String }, // Transaction ID link
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const Payment = mongoose.model('Payment', paymentSchema);
@@ -71,6 +77,8 @@ const expenseSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   description: { type: String },
   relatedTrx: { type: String }, // For linking to specific Lot or Bill
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const Expense = mongoose.model('Expense', expenseSchema);

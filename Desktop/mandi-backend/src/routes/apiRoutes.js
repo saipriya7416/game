@@ -6,9 +6,16 @@ const { addSupplier, getSuppliers, addBuyer, getBuyers, verifyParty } = require(
 const { createLot, allocateLot, getAllLots } = require('../controllers/Operations');
 const { generateSupplierBill, generateBuyerInvoice, recordPayment, recordExpense, getSupplierLedger } = require('../controllers/Finance');
 const { register, login, getMe, listUsers, deleteUser, logout } = require('../controllers/Auth');
+const { uploadFile, getDocuments, deleteDocument } = require('../controllers/Storage');
+const { getBillPDF, getInvoicePDF, exportSuppliersExcel, exportBuyersExcel, exportInventoryExcel } = require('../controllers/Reports');
 
 // Middleware
 const { protect, authorize } = require('../middleware/auth');
+const multer = require('multer');
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 // =====================================================
 // --- 3. AUTH ROUTES (Public) ---
@@ -24,6 +31,22 @@ router.post('/auth/logout', logout);
 router.get('/auth/me', protect, getMe);
 router.get('/auth/users', protect, authorize('Admin'), listUsers);
 router.delete('/auth/user/:id', protect, authorize('Admin'), deleteUser);
+
+// =====================================================
+// --- 17. STORAGE & DOCUMENTS ---
+// =====================================================
+router.post('/upload', protect, upload.single('file'), uploadFile);
+router.get('/documents', protect, getDocuments);
+router.delete('/document/:id', protect, deleteDocument);
+
+// =====================================================
+// --- 20. REPORTS & EXPORTS (Premium) ---
+// =====================================================
+router.get('/report/pdf/bill/:id', protect, getBillPDF);
+router.get('/report/pdf/invoice/:id', protect, getInvoicePDF);
+router.get('/report/excel/suppliers', protect, authorize('Admin', 'Accountant'), exportSuppliersExcel);
+router.get('/report/excel/buyers', protect, authorize('Admin', 'Accountant'), exportBuyersExcel);
+router.get('/report/excel/inventory', protect, authorize('Admin', 'Operations Staff'), exportInventoryExcel);
 
 // =====================================================
 // --- 4 & 5. PARTIES (Protected) ---

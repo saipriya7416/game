@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+npm-error.log
+.env
+.git
+.gitignore
+seedAdmin.js
+public/uploads/*
+# Keep the directory but empty it
+!public/uploads/.gitkeep
