@@ -20,8 +20,8 @@ const buyerSchema = new mongoose.Schema({
   phone: { type: String, required: true, unique: true },
   shopName: { type: String },
   address: { type: String },
-  govIdNumber: { type: String, required: true },
-  idType: { type: String, enum: ['Aadhaar', 'PAN', 'Voter ID'], required: true },
+  govIdNumber: { type: String }, // Optional
+  idType: { type: String, enum: ['Aadhaar', 'PAN', 'Voter ID'] },
   creditLimit: { type: Number, default: 100000 },
   notes: { type: String },
   outstanding: { type: Number, default: 0 }, // Purchase & Payment tracking
