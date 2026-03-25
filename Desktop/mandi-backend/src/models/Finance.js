@@ -23,8 +23,11 @@ const supplierBillSchema = new mongoose.Schema({
   totalExpenses: { type: Number, required: true },
   netSale: { type: Number, required: true }, // Gross - TotalExp
   advancePayment: { type: Number, default: 0 },
-  balancePayable: { type: Number, required: true }, // Net - Advance
-  status: { type: String, enum: ['Draft', 'Final', 'Paid'], default: 'Draft' }, // Track settlement
+  balancePayable: { type: Number, required: true }, // Initial Net - Advance
+  amountPaid: { type: Number, default: 0 }, // Total actually paid till now
+  balanceRemaining: { type: Number, default: 0 }, // balancePayable - amountPaid
+  paymentMode: { type: String, enum: ['Cash', 'UPI', 'Bank', 'None'], default: 'None' },
+  status: { type: String, enum: ['Draft', 'Final', 'Paid', 'Partial'], default: 'Draft' }, // Track settlement status
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });

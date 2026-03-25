@@ -57,6 +57,7 @@ router.post('/supplier', protect, authorize('Admin', 'Operations Staff'), addSup
 router.get('/suppliers', protect, getSuppliers);
 router.post('/buyer', protect, authorize('Admin', 'Operations Staff'), addBuyer);
 router.get('/buyers', protect, getBuyers);
+router.get('/buyer/:id/intelligence', protect, require('../controllers/Parties').getBuyerIntelligence);
 
 // =====================================================
 // --- 6 & 7. OPERATIONS (Protected) ---
@@ -65,6 +66,10 @@ router.get('/buyers', protect, getBuyers);
 router.post('/lot/intake', protect, authorize('Admin', 'Operations Staff'), createLot);
 router.post('/lot/allocate', protect, authorize('Admin', 'Operations Staff'), allocateLot);
 router.get('/lots', protect, getAllLots);
+router.get('/inventory/dashboard', protect, authorize('Admin', 'Operations Staff', 'Accountant'), require('../controllers/Operations').getInventoryDashboard);
+router.get('/traceability/lot/:lotId', protect, require('../controllers/Operations').getLotTraceability);
+router.get('/traceability/allocation/:allocationId', protect, require('../controllers/Operations').getBuyerTraceability);
+router.get('/intelligence/product', protect, require('../controllers/Operations').getProductIntelligence);
 
 // =====================================================
 // --- 8, 9, 10, 11, 12. FINANCIALS (Protected) ---
