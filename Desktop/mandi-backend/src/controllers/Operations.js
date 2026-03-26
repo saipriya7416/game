@@ -151,18 +151,59 @@ exports.getAllLots = async (req, res) => {
 
 exports.getInventoryDashboard = async (req, res) => {
   try {
+    const { SupplierBill, BuyerInvoice, Expense } = require('../models/Finance');
+    
     const today = new Date();
     const startOfDay = new Date(today.setHours(0,0,0,0));
     
     const lotsToday = await InventoryLot.find({ createdAt: { $gte: startOfDay } });
     const allLots = await InventoryLot.find();
     
+    const allInvoices = await BuyerInvoice.find();
+    const allExpenses = await Expense.find();
+    const allSupplierBills = await SupplierBill.find();
+    
+    // 1. Net Revenue: Total Sales - Total Expenses
+    const totalSales = allInvoices.reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
+    const totalExpenses = allExpenses.reduce((acc, exp) => acc + (exp.amount || 0), 0);
+    const netRevenue = totalSales - totalExpenses;
+    
+    // 2. Inventory: Live Stock Remaining
+    const remainingStockKg = allLots.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + (i.remainingQuantity || 0), 0), 0);
+    
+    // 3. Settlements: Pending Bills & Unpaid Invoices
+    const pendingSupplierBills = allSupplierBills.filter(b => b.status === 'Draft' || b.status === 'Partial').length;
+    let pendingBuyerInvoicesCount = 0;
+    let pendingBuyerAmount = 0;
+    
+    allInvoices.forEach(i => {
+      if (i.paymentStatus === 'Unpaid' || i.paymentStatus === 'Partial') {
+        pendingBuyerInvoicesCount++;
+        // If there's partial payments logic: for now, just sum totalAmount or a theoretical balance field. 
+        pendingBuyerAmount += (i.totalAmount || 0); // simplification for the trend
+      }
+    });
+    
+    const settlementsPending = pendingSupplierBills + pendingBuyerInvoicesCount;
+    
+    // 4. Procurement: Active Lots vs Total Lots
+    const activeProcurementLots = allLots.filter(l => l.status === 'Pending Auction' || l.status === 'Partially Sold').length;
+    const totalProcurementLots = allLots.length;
+    const lowStockAlerts = allLots.filter(l => l.lineItems.some(i => i.remainingQuantity < 100 && i.remainingQuantity > 0)).length;
+
     const stats = {
       totalLotsToday: lotsToday.length,
       incomingKgToday: lotsToday.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + i.netWeight, 0), 0),
       totalSoldKg: allLots.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + i.soldQuantity, 0), 0),
-      remainingStockKg: allLots.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + i.remainingQuantity, 0), 0),
-      pendingDeliveryKg: allLots.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + (i.soldQuantity - i.deliveredQuantity), 0), 0)
+      remainingStockKg,
+      pendingDeliveryKg: allLots.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + (i.soldQuantity - i.deliveredQuantity), 0), 0),
+      // New dynamic KPI fields
+      netRevenue,
+      settlementsPending,
+      settlementsPendingAmount: pendingBuyerAmount,
+      activeProcurementLots,
+      totalProcurementLots,
+      lowStockAlerts
     };
     
     res.json({ status: 'SUCCESS', data: stats });
