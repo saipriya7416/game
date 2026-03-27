@@ -182,17 +182,19 @@ exports.getInventoryDashboard = async (req, res) => {
       settlementsPendingAmount += (a.quantity * a.rate);
     });
 
-    // b. Add Supplier Bills (Draft/Partial balances)
+    // b. Add Supplier Bills (All bills where money is still owed to the farmer)
+    // Counting any bill that hasn't been fully paid out
     allSupplierBills.forEach(b => {
-      if (b.status === 'Draft' || b.status === 'Partial') {
+      const balance = b.balanceRemaining ?? b.balancePayable ?? 0;
+      if (balance > 0) {
         settlementsPending++;
-        settlementsPendingAmount += (b.balanceRemaining || b.balancePayable || 0);
+        settlementsPendingAmount += balance;
       }
     });
 
     // c. Add Buyer Invoices (Unpaid/Partial)
     allInvoices.forEach(i => {
-      if (i.paymentStatus === 'Unpaid' || i.paymentStatus === 'Partial') {
+      if (i.paymentStatus !== 'Paid') {
         settlementsPending++;
         settlementsPendingAmount += (i.totalAmount || 0);
       }
