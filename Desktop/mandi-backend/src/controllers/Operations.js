@@ -162,6 +162,7 @@ exports.getInventoryDashboard = async (req, res) => {
     const allInvoices = await BuyerInvoice.find();
     const allExpenses = await Expense.find();
     const allSupplierBills = await SupplierBill.find();
+    const unbilledAllocations = await Allocation.find({ isSettledToFarmer: false });
     
     // 1. Net Revenue: Total Sales - Total Expenses
     const totalSales = allInvoices.reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
@@ -171,11 +172,17 @@ exports.getInventoryDashboard = async (req, res) => {
     // 2. Inventory: Live Stock Remaining
     const remainingStockKg = allLots.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + (i.remainingQuantity || 0), 0), 0);
     
-    // 3. Settlements: Pending Bills & Unpaid Invoices
+    // 3. Settlements: Pending Bills & Unpaid Invoices + Unbilled Allocations
     let settlementsPending = 0;
     let settlementsPendingAmount = 0;
     
-    // Add Supplier Bills
+    // a. Add Unbilled Allocations (Money owed to farmers for sales not yet billed)
+    unbilledAllocations.forEach(a => {
+      settlementsPending++;
+      settlementsPendingAmount += (a.quantity * a.rate);
+    });
+
+    // b. Add Supplier Bills (Draft/Partial balances)
     allSupplierBills.forEach(b => {
       if (b.status === 'Draft' || b.status === 'Partial') {
         settlementsPending++;
@@ -183,7 +190,7 @@ exports.getInventoryDashboard = async (req, res) => {
       }
     });
 
-    // Add Buyer Invoices
+    // c. Add Buyer Invoices (Unpaid/Partial)
     allInvoices.forEach(i => {
       if (i.paymentStatus === 'Unpaid' || i.paymentStatus === 'Partial') {
         settlementsPending++;
