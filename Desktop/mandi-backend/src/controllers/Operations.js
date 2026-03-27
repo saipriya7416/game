@@ -172,19 +172,24 @@ exports.getInventoryDashboard = async (req, res) => {
     const remainingStockKg = allLots.reduce((acc, lot) => acc + lot.lineItems.reduce((s, i) => s + (i.remainingQuantity || 0), 0), 0);
     
     // 3. Settlements: Pending Bills & Unpaid Invoices
-    const pendingSupplierBills = allSupplierBills.filter(b => b.status === 'Draft' || b.status === 'Partial').length;
-    let pendingBuyerInvoicesCount = 0;
-    let pendingBuyerAmount = 0;
+    let settlementsPending = 0;
+    let settlementsPendingAmount = 0;
     
-    allInvoices.forEach(i => {
-      if (i.paymentStatus === 'Unpaid' || i.paymentStatus === 'Partial') {
-        pendingBuyerInvoicesCount++;
-        // If there's partial payments logic: for now, just sum totalAmount or a theoretical balance field. 
-        pendingBuyerAmount += (i.totalAmount || 0); // simplification for the trend
+    // Add Supplier Bills
+    allSupplierBills.forEach(b => {
+      if (b.status === 'Draft' || b.status === 'Partial') {
+        settlementsPending++;
+        settlementsPendingAmount += (b.balanceRemaining || b.balancePayable || 0);
       }
     });
-    
-    const settlementsPending = pendingSupplierBills + pendingBuyerInvoicesCount;
+
+    // Add Buyer Invoices
+    allInvoices.forEach(i => {
+      if (i.paymentStatus === 'Unpaid' || i.paymentStatus === 'Partial') {
+        settlementsPending++;
+        settlementsPendingAmount += (i.totalAmount || 0);
+      }
+    });
     
     // 4. Procurement: Active Lots vs Total Lots
     const activeProcurementLots = allLots.filter(l => l.status === 'Pending Auction' || l.status === 'Partially Sold').length;
@@ -200,7 +205,7 @@ exports.getInventoryDashboard = async (req, res) => {
       // New dynamic KPI fields
       netRevenue,
       settlementsPending,
-      settlementsPendingAmount: pendingBuyerAmount,
+      settlementsPendingAmount,
       activeProcurementLots,
       totalProcurementLots,
       lowStockAlerts
