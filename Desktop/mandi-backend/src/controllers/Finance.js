@@ -200,12 +200,17 @@ exports.generateFarmerSettlementBill = async (req, res) => {
     await newBill.save();
 
     // 3. MARK ALL CONTRIBUTING ALLOCATIONS AS SETTLED
-    // The items in payload come with lotId
-    const allocationIds = items.map(i => i.lotId); // Mapping lotId to allocationId from the frontend payload
-    await Allocation.updateMany(
-      { _id: { $in: allocationIds } },
-      { isSettledToFarmer: true, farmerBillRef: newBill._id }
-    );
+    // Filter out manual entry IDs (they start with 'manual-' and are not in DB)
+    const validAllocationIds = items
+      .map(i => i.lotId)
+      .filter(id => id && id.length === 24 && /^[0-9a-fA-F]+$/.test(id));
+
+    if (validAllocationIds.length > 0) {
+      await Allocation.updateMany(
+        { _id: { $in: validAllocationIds } },
+        { isSettledToFarmer: true, farmerBillRef: newBill._id }
+      );
+    }
 
     // --- AUTOMATED NOTIFICATION ---
     const msg = `🧾 SETTLEMENT FINALIZED: ${party.name}\nBill No: ${billId}\nNet Pay: ₹${balancePayable}\nThank you.`;
