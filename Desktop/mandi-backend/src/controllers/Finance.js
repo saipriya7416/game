@@ -95,7 +95,7 @@ exports.generateBuyerInvoice = async (req, res) => {
 // --- 11. RECORD PAYMENTS ---
 exports.recordPayment = async (req, res) => {
   try {
-    const { partyId, partyType, amount, mode, type, referenceId } = req.body;
+    const { partyId, partyType, amount, mode, type, referenceId, againstBillNo, againstInvoiceNo } = req.body;
     
     const party = partyType === 'Supplier' 
       ? await Supplier.findById(partyId) 
@@ -103,6 +103,19 @@ exports.recordPayment = async (req, res) => {
 
     const payment = new Payment({ party: partyId, partyType, amount, mode, type, referenceId });
     await payment.save();
+
+    // Link payment to the specific document if provided
+    if (partyType === 'Supplier' && againstBillNo) {
+      await SupplierBill.findOneAndUpdate(
+        { billNumber: againstBillNo },
+        { status: 'Paid', amountPaid: amount, balanceRemaining: 0 }
+      );
+    } else if (partyType === 'Buyer' && againstInvoiceNo) {
+      await BuyerInvoice.findOneAndUpdate(
+        { invoiceNumber: againstInvoiceNo },
+        { paymentStatus: 'Paid' }
+      );
+    }
 
     // --- AUTOMATED NOTIFICATION ---
     if (party) {
