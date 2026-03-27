@@ -81,6 +81,13 @@ router.post('/payment', protect, authorize('Admin', 'Accountant'), recordPayment
 router.post('/expense', protect, authorize('Admin', 'Accountant', 'Operations Staff'), recordExpense);
 router.get('/ledger/supplier/:supplierId', protect, authorize('Admin', 'Accountant'), getSupplierLedger);
 
+// --- SETTLEMENT SPECIFIC ROUTES ---
+const Finance = require('../controllers/Finance');
+router.get('/settlement/farmer/:farmerId/pending', protect, Finance.getFarmerPendingSettlements);
+router.post('/settlement/farmer/bill', protect, authorize('Admin', 'Accountant'), Finance.generateFarmerSettlementBill);
+router.get('/settlement/farmer/:farmerId/history', protect, Finance.getFarmerSettlementHistory);
+router.post('/settlement/farmer/bill/:id/void', protect, authorize('Admin'), Finance.voidFarmerSettlementBill);
+
 // =====================================================
 // --- 13. COMPLIANCE (Protected) ---
 // =====================================================

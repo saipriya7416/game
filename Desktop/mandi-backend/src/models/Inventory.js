@@ -55,6 +55,8 @@ const allocationSchema = new mongoose.Schema({
   invoiceNumber: { type: String },
   isDelivered: { type: Boolean, default: false },
   deliveredAt: { type: Date },
+  isSettledToFarmer: { type: Boolean, default: false }, // Tracks if final bill was given to farmer
+  farmerBillRef: { type: mongoose.Schema.Types.ObjectId, ref: 'SupplierBill' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
