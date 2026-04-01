@@ -25,12 +25,32 @@ if (process.env.NODE_ENV === 'development') {
 // Serve static files (Local storage fallback)
 app.use('/uploads', express.static(path.join(__dirname, '../storage')));
 
-// --- DATABASE CONNECTION ---
-// (Already connected logic remains below)
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mandi-erp';
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ Mandi ERP Service: Database Synchronized'))
-  .catch(err => console.error('❌ Database Sync Failure:', err));
+// --- DATABASE CONNECTION (ROBUST) ---
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/mandi-erp';
+
+const connectWithRetry = (count = 0) => {
+  const maxRetries = 5;
+  mongoose.connect(MONGODB_URI)
+    .then(() => console.log('✅ Mandi ERP Service: Database Synchronized'))
+    .catch(err => {
+      console.error(`❌ Database Sync Failure [Attempt ${count + 1}/${maxRetries}]:`, err.message);
+      if (err.message.includes('ECONNREFUSED')) {
+        console.log('\n💡 [TROUBLESHOOTING]: Local MongoDB instance is not responding.');
+        console.log(' 👉 1. Open Windows Services (services.msc)');
+        console.log(' 👉 2. Find "MongoDB Server" and right-click "Start"');
+        console.log(` 👉 3. Ensure your .env MONGODB_URI port at 27017 matches your config.\n`);
+      }
+      
+      if (count < maxRetries) {
+        console.log(`⏳ Retrying connection in 5 seconds...`);
+        setTimeout(() => connectWithRetry(count + 1), 5000);
+      } else {
+        console.error('💥 CRITICAL: Could not establish database connection after multiple attempts. Application may be unstable.');
+      }
+    });
+};
+
+connectWithRetry();
 
 // --- API ARCHITECTURE (REST) ---
 const apiRoutes = require('./routes/apiRoutes');
