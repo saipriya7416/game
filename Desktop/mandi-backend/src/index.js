@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Serve static files (Local storage fallback)
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../storage')));
 
 // --- DATABASE CONNECTION ---
 // (Already connected logic remains below)

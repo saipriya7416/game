@@ -29,7 +29,8 @@ const inventoryLotSchema = new mongoose.Schema({
   vehicleNumber: { type: String },
   driverName: { type: String },
   origin: { type: String }, // Village / Farm
-  billPhoto: { type: String }, // URL to uploaded bill
+  billPhoto: { type: String }, // Legacy field
+  attached_bill_photo: { type: String }, // NEW field
   notes: { type: String },
   lineItems: [lotLineItemSchema],
   status: { 

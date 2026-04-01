@@ -47,7 +47,7 @@ exports.uploadFile = async (req, res) => {
       console.log(`✅ File Uploaded to Cloud: ${fileName}`);
     } else {
       // --- LOCAL FALLBACK ---
-      const uploadDir = path.join(__dirname, "../../public/uploads");
+      const uploadDir = path.join(__dirname, "../../storage");
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }

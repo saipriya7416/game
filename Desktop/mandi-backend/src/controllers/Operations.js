@@ -13,7 +13,7 @@ exports.createLot = async (req, res) => {
       origin, 
       notes, 
       lineItems,
-      billPhoto 
+      attached_bill_photo 
     } = req.body;
     
     const party = await Supplier.findById(supplierId);
@@ -51,7 +51,7 @@ exports.createLot = async (req, res) => {
       driverName,
       origin,
       notes,
-      billPhoto,
+      attached_bill_photo: attached_bill_photo,
       lineItems: processedItems,
       status: 'Pending Auction',
       createdBy: req.user?._id // If auth is available
@@ -143,7 +143,17 @@ exports.getAllLots = async (req, res) => {
     const lots = await InventoryLot.find()
       .populate('supplier')
       .sort({ createdAt: -1 });
-    res.json({ status: 'SUCCESS', data: lots });
+    
+    // BACKWARD COMPATIBILITY: Map legacy billPhoto to new field name
+    const mappedLots = lots.map(l => {
+      const lotObj = l.toObject();
+      if (!lotObj.attached_bill_photo && lotObj.billPhoto) {
+        lotObj.attached_bill_photo = lotObj.billPhoto;
+      }
+      return lotObj;
+    });
+
+    res.json({ status: 'SUCCESS', data: mappedLots });
   } catch (err) {
     res.status(400).json({ status: 'ERROR', message: err.message });
   }
